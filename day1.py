@@ -1,6 +1,6 @@
 import argparse
 
-parser = argparse.ArgumentParser(description="AoC day x")
+parser = argparse.ArgumentParser(description="AoC day 1")
 parser.add_argument("file", help="The file that should be sourced")
 parser.add_argument("-p", "--phase", help="The part of the exercise that we are at", type=int, default=1)
 
