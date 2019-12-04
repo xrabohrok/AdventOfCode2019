@@ -1,6 +1,6 @@
 import argparse
 
-parser = argparse.ArgumentParser(description="AoC day 2")
+parser = argparse.ArgumentParser(description="AoC day 4")
 # parser.add_argument("file", help="The file that should be sourced")
 parser.add_argument("-p", "--phase", help="The part of the exercise that we are at", type=int, default=1)
 parser.add_argument("-t", "--target", help="A target value being aimed for", type=int, default=0)
@@ -82,73 +82,6 @@ def ruleRunner(high, low, rules):
 # The value is within the range given in your puzzle input.
 # Two adjacent digits are the same (like 22 in 122345).
 # Going from left to right, the digits never decrease; they only ever increase or stay the same (like 111123 or 135679).
-
-class progState:
-    progPointer = 0
-    turing = []
-    running = True
-    errored = False
-
-    def clone(self):
-        temp = progState()
-        temp.progPointer = self.progPointer
-        temp.running = self.running
-        temp.turing = self.turing.copy()
-        return temp
-
-
-def parseCodes(curState):
-    opd = curState.clone()
-    # print(f"pointer at{curState.progPointer}")
-    # print(f"program is {curState.turing}")
-    if curState.turing[curState.progPointer] == 1:
-        # Add from first two positions, store in the third
-        opd.turing[opd.turing[opd.progPointer + 3]] = opd.turing[opd.turing[opd.progPointer+1]] + opd.turing[opd.turing[opd.progPointer+2]]
-        opd.progPointer += 4
-    elif curState.turing[curState.progPointer] == 2:
-        # Add from first two positions, store in the third
-        opd.turing[opd.turing[opd.progPointer + 3]] = opd.turing[opd.turing[opd.progPointer+1]] * opd.turing[opd.turing[opd.progPointer+2]]
-        opd.progPointer += 4
-    elif curState.turing[curState.progPointer] == 99:
-        # halt
-        opd.running = False
-    else:
-        #error
-        opd.running = False
-        opd.errored = True
-
-    return opd
-
-
-def solutionPt1(items):
-    program = progState()
-    program.turing = items
-    while program.running :
-        program = parseCodes(program)
-        if program.errored:
-            print(f"irregular execution at pointer {program.progPointer}")
-
-    return program.turing
-
-def solutionPt2(items, target):
-
-    initState = progState()
-    initState.turing = items
-    for x in range(0, 99):
-        for y in range(0, 99):
-            program = initState.clone()
-            program.turing[1] = x
-            program.turing[2] = y
-            # print(f"{x}, {y}")
-            while program.running:
-                program = parseCodes(program)
-                if program.errored:
-                    print(f"irregular execution at pointer {program.progPointer}")
-            if program.turing[0] == target:
-                print(f"target found: {x}, {y}")
-                return x, y
-
-    return None
 
 
 main(parser.parse_args())
