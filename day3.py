@@ -30,9 +30,9 @@ def main(argv):
     if argv.phase == 1:
         sol = solutionPt1(commands)
         print(f"The shortest point is {sol}")
-    # elif argv.phase == 2:
-    #     sol = solutionPt2(commands, argv.target)
-    #     print(f"The correct inputs are {sol}")
+    elif argv.phase == 2:
+        sol = solutionPt2(commands)
+        print(f"The closest point in terms of propagation delay is {sol}")
 
 def processCommands(commands):
     betterCommands = []
@@ -81,7 +81,7 @@ def buildGrid(bounds):
     print("done gridding")
     return grid
 
-def drawSegment(grid, horizInc, vertInc, pos, id, amount):
+def drawSegment(grid, horizInc, vertInc, pos, id, amount, distance):
     distTraveledVert = 0
     distTraveledHoriz = 0
     intersections = []
@@ -91,45 +91,60 @@ def drawSegment(grid, horizInc, vertInc, pos, id, amount):
         curSpot = grid[pos[0]][pos[1]]
         # if len(curSpot) > 0:
         #     print(f"peek {curSpot}")
-        if len(curSpot) >= 1 and str.find(curSpot, str(id)) == -1:
+        distance +=1
+        if len(curSpot) >= 1 and str.find(curSpot, f"id:{id}") == -1:
             intersections.append(pos)
-        grid[pos[0]][pos[1]] += str(id)
+        grid[pos[0]][pos[1]] += f"^id:{id}|{distance}|"
         pos = pos[0] + horizInc, pos[1] + vertInc
         distTraveledVert += abs(vertInc)
         distTraveledHoriz += abs(horizInc)
-    return pos, grid, intersections
+    return pos, grid, intersections, distance
 
 def traceAndIntercept(grid, wirecommands, bounds, id):
     pos = abs(bounds[1]), abs(bounds[3])
     intersections = []
+    distance = 0
     for command in wirecommands:
         # print(f"bounds {bounds}")
         # print(f"command {command}")
         if command[0] == 'U':
-            result = drawSegment(grid, 0, 1, pos, id, command[1])
+            result = drawSegment(grid, 0, 1, pos, id, command[1], distance)
             pos = result[0]
             grid = result[1]
             intersections += result[2]
+            distance = result[3]
         elif command[0] == 'D':
-            result = drawSegment(grid, 0, -1, pos, id, command[1])
+            result = drawSegment(grid, 0, -1, pos, id, command[1], distance)
             pos = result[0]
             grid = result[1]
             intersections += result[2]
+            distance = result[3]
         elif command[0] == 'L':
-            result = drawSegment(grid, -1, 0, pos, id, command[1])
+            result = drawSegment(grid, -1, 0, pos, id, command[1], distance)
             pos = result[0]
             grid = result[1]
             intersections += result[2]
+            distance = result[3]
         elif command[0] == 'R':
-            result = drawSegment(grid, 1, 0, pos, id, command[1])
+            result = drawSegment(grid, 1, 0, pos, id, command[1], distance)
             pos = result[0]
             grid = result[1]
             intersections += result[2]
+            distance = result[3]
 
     return intersections
 
 def manhattanDist(pointa, pointb):
     return abs(pointa[0] - pointb[0]) + abs(pointa[1] - pointb[1])
+
+def stepsFromPoint(point, grid):
+    sum = 0
+    sections = str.split(grid[point[0]][point[1]], '|')
+    for section in sections:
+        if str.find(section, "id") == -1 and str.isnumeric(section):
+            sum += int(section)
+    # subtract the two starting squares
+    return sum - 2
 
 def solutionPt1(items):
     commands = processCommands(items)
@@ -146,7 +161,7 @@ def solutionPt1(items):
         print(f"line {idx}")
         results += traceAndIntercept(grid, cmdset, bounds, idx)
 
-    print(results)
+    # print(results)
     distIntersections = []
     for intersection in results:
         distIntersections.append((manhattanDist(center, intersection), intersection))
@@ -155,25 +170,31 @@ def solutionPt1(items):
     return distIntersections[1]
 
 
-def solutionPt2(items, target):
+def solutionPt2(items):
+    commands = processCommands(items)
+    print(f"command sets: {len(commands)}")
+    bounds = findzerozerobounds(commands)
+    print(f"bounds: {bounds}")
+    grid = buildGrid(bounds)
 
-    initState = progState()
-    initState.turing = items
-    for x in range(0, 99):
-        for y in range(0, 99):
-            program = initState.clone()
-            program.turing[1] = x
-            program.turing[2] = y
-            # print(f"{x}, {y}")
-            while program.running:
-                program = parseCodes(program)
-                if program.errored:
-                    print(f"irregular execution at pointer {program.progPointer}")
-            if program.turing[0] == target:
-                print(f"target found: {x}, {y}")
-                return x, y
+    # center = int((bounds[0] + abs(bounds[1])/2)), int((bounds[2] + abs(bounds[3])/2))
+    center = abs(bounds[1]), abs(bounds[3])
 
-    return None
+    results = []
+    for idx, cmdset in enumerate(commands):
+        print(f"line {idx}")
+        results += traceAndIntercept(grid, cmdset, bounds, idx)
+
+    # print(results)
+    distIntersections = []
+    for intersection in results:
+        distIntersections.append((stepsFromPoint(intersection, grid), intersection))
+        #print(f"{grid[intersection[0]][intersection[1]]}")
+    distIntersections.sort()
+    #print(distIntersections)
+
+    # counting the squares entered, not total squares, remove the two starters
+    return distIntersections[1]
 
 
 main(parser.parse_args())
