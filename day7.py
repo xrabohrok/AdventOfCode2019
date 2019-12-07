@@ -1,5 +1,5 @@
 import argparse
-
+from itertools import permutations
 parser = argparse.ArgumentParser(description="AoC day 5")
 parser.add_argument("file", help="The file that should be sourced")
 parser.add_argument("-p", "--phase", help="The part of the exercise that we are at", type=int, default=1)
@@ -28,9 +28,8 @@ def main(argv):
             commands.append(int(x))
 
     if argv.phase == 1:
-        print("All outputs should be zero")
         sol = solutionPt1(commands)
-        print(sol)
+        print(f"\nBiggest output is {sol[0]} at {sol[1]}")
 
 
 # Opcode 1 adds together numbers read from two positions and stores the result in a third position.
@@ -63,11 +62,20 @@ def main(argv):
 class Computer:
     # a 'none' input is a user input halt
     def __init__(self, program, prog_input=None):
-        self.program = program
+        self.program_orig = program
+        self.program = self.program_orig.copy()
         if prog_input is None:
             self.input = [None]
         self.input_counter = 0
         self.output = []
+
+    def reset(self):
+        self.input_counter = 0
+        self.output = []
+        self.program = self.program_orig.copy()
+        self.input = [None]
+        # for i in range(0, len(self.program_orig)):
+        #     self.program[i] = self.program_orig[i]
 
     def run(self):
         program = progState()
@@ -143,7 +151,7 @@ class Computer:
         elif command == 99:
             # halt
             opd.running = False
-            print("--FINISH--")
+            # print("--FINISH--")
         else:
             # error
             opd.running = False
@@ -166,12 +174,70 @@ class progState:
         return temp
 
 
+def digit_splitter(num, min_size=1):
+    sign = 1
+    digits = []
+    if num < 0:
+        sign = -1
+        num = abs(num)
+    place = 1
+    while num > place:
+        digits.append(int(num % (place * 10) / place) * sign)
+        place *= 10
+
+    while len(digits) < min_size:
+        digits.append(0)
+    digits.reverse()
+    return digits
+
+
 def solutionPt1(items):
-    comp = Computer(items)
-    comp.run()
+    phase_num = 0
+    biggest_out = 0
+    biggest_phase = []
 
-    return comp.output[0]
+    flagged_output = 0
 
+    allComps = []
+    for i in range(0, 5):
+        allComps.append(Computer(items.copy()))
+
+    possibleSettings = permutations([0,1,2,3,4], 5)
+
+    for setting in possibleSettings:
+    # while phase_num < 44444:
+    # while phase_num < 3:
+
+        next_buffer = 0
+        # phase = digit_splitter(1234, 5)
+        phase = setting
+        phase_digit = 0
+        for amp in allComps:
+            amp.reset()
+            amp.input = [phase[phase_digit], next_buffer]
+            amp.run()
+            next_buffer = amp.output[0]
+            phase_digit += 1
+
+        if next_buffer > biggest_out:
+            print(f"winner: phase {phase_num} : value {next_buffer}")
+            biggest_out = next_buffer
+            biggest_phase = phase
+        # else:
+        #     print(f"loser: {next_buffer}")
+        if phase_num % 10000 == 0:
+            print(f"{int(phase_num/10000)}", end="", flush=True)
+            # print("blah")
+        # print(phase_num)
+
+        if phase_num == 10432:
+            flagged_output = next_buffer
+
+        phase_num += 1
+
+    print(f"tagged output {flagged_output}")
+
+    return biggest_out, biggest_phase
 
 
 main(parser.parse_args())
