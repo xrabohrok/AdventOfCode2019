@@ -28,7 +28,10 @@ def main(argv):
             commands.append(int(x))
 
     if argv.phase == 1:
-        sol = solutionPt1(commands)
+        sol = solutionPt1(commands, [0,1,2,3,4])
+        print(f"\nBiggest output is {sol[0]} at {sol[1]}")
+    elif argv.phase == 2:
+        sol = solutionPt2(commands, [5,6,7,8,9])
         print(f"\nBiggest output is {sol[0]} at {sol[1]}")
 
 
@@ -63,29 +66,52 @@ class Computer:
     # a 'none' input is a user input halt
     def __init__(self, program, prog_input=None):
         self.program_orig = program
-        self.program = self.program_orig.copy()
         if prog_input is None:
             self.input = [None]
         self.input_counter = 0
         self.output = []
 
+        self.pipe_mode = False
+        self.inpipe = []
+        self.outpipe = []
+        self.cur_state = None
+
     def reset(self):
         self.input_counter = 0
         self.output = []
-        self.program = self.program_orig.copy()
         self.input = [None]
+        self.cur_state = None
         # for i in range(0, len(self.program_orig)):
         #     self.program[i] = self.program_orig[i]
 
-    def run(self):
-        program = progState()
-        program.turing = self.program
-        while program.running:
-            program = self._parseCodes(program)
-            if program.errored:
-                print(f"irregular execution at pointer {program.progPointer}")
+    def run(self, restart=True):
+        if self.cur_state is None or restart:
+            self.cur_state = progState()
+            self.cur_state.turing = self.program_orig
 
-        return program.turing
+        while self.cur_state.running:
+            self.cur_state = self._parseCodes(self.cur_state)
+            if self.cur_state.errored:
+                print(f"irregular execution at pointer {self.cur_state.progPointer}")
+            if self.cur_state.paused_for_input:
+                return self.cur_state.turing
+
+        return self.cur_state.turing
+
+    def is_running(self):
+        if self.cur_state is None:
+            return False
+        return self.cur_state.running
+
+    def insert_pipeline(self, thing):
+        self.inpipe = [int(thing)]
+
+    def read_pipeline(self):
+        if len(self.outpipe) > 0:
+            # print(f" popped {self.outpipe[-1]}")
+            return self.outpipe.pop()
+        else:
+            return None
 
     def _getModes(self, number):
         return int(int(number % 1000 / 100)), int(number % 10000 / 1000), int(number / 10000)
@@ -121,18 +147,33 @@ class Computer:
             opd.progPointer += 4
         elif command == 3:
             # take input
-            if self.input[self.input_counter] is None:
-                print("HALT---AWAITING INPUT:")
-                opd.turing[opd.turing[opd.progPointer + 1]] = int(input())
-            else:
-                opd.turing[opd.turing[opd.progPointer + 1]] = self.input[self.input_counter]
-            if self.input_counter < len(self.input) - 1:
+            if not self.pipe_mode:
+                if self.input[self.input_counter] is None:
+                    print("HALT---AWAITING INPUT:")
+                    opd.turing[opd.turing[opd.progPointer + 1]] = int(input())
+                else:
+                    opd.turing[opd.turing[opd.progPointer + 1]] = self.input[self.input_counter]
+                if self.input_counter > len(self.input) - 1:
+                    self.input = [None]
                 self.input_counter += 1
+            else:
+                if opd.paused_for_input:
+                    opd.turing[opd.turing[opd.progPointer + 1]] = self.inpipe.pop()
+                    opd.paused_for_input = False
+                else:
+                    if len(self.inpipe) == 1:
+                        opd.turing[opd.turing[opd.progPointer + 1]] = self.inpipe.pop()
+                        opd.paused_for_input = False
+                    else:
+                        opd.paused_for_input = True
+                        return opd
             opd.progPointer += 2
-
         elif command == 4:
             # output to buffer
-            self.output.append(paramA)
+            if not self.pipe_mode:
+                self.output.append(paramA)
+            else:
+                self.outpipe.insert(0, paramA)
             opd.progPointer += 2
         elif command == 5:
             # first value not zero, set pointer to second val
@@ -161,16 +202,19 @@ class Computer:
 
 
 class progState:
-    progPointer = 0
-    turing = []
-    running = True
-    errored = False
+    def __init__(self):
+        self.progPointer = 0
+        self.turing = []
+        self.running = True
+        self.errored = False
+        self.paused_for_input = False
 
     def clone(self):
         temp = progState()
         temp.progPointer = self.progPointer
         temp.running = self.running
         temp.turing = self.turing.copy()
+        temp.paused_for_input = self.paused_for_input
         return temp
 
 
@@ -191,7 +235,7 @@ def digit_splitter(num, min_size=1):
     return digits
 
 
-def solutionPt1(items):
+def solutionPt2(items, phases):
     phase_num = 0
     biggest_out = 0
     biggest_phase = []
@@ -200,28 +244,38 @@ def solutionPt1(items):
 
     allComps = []
     for i in range(0, 5):
-        allComps.append(Computer(items.copy()))
+        comp = Computer(items.copy())
+        comp.pipe_mode = True
+        allComps.append(comp)
 
-    possibleSettings = permutations([0,1,2,3,4], 5)
+    possibleSettings = permutations([5,6,7,8,9], 5)
 
-    for setting in possibleSettings:
-    # while phase_num < 44444:
-    # while phase_num < 3:
+    for phase in possibleSettings:
 
-        next_buffer = 0
-        # phase = digit_splitter(1234, 5)
-        phase = setting
         phase_digit = 0
+        print(f"curPhase : {phase}")
+
+        # setup and firstrun with phases
         for amp in allComps:
             amp.reset()
-            amp.input = [phase[phase_digit], next_buffer]
+            amp.insert_pipeline(phase[phase_digit])
             amp.run()
-            next_buffer = amp.output[0]
             phase_digit += 1
 
-        if next_buffer > biggest_out:
-            print(f"winner: phase {phase_num} : value {next_buffer}")
-            biggest_out = next_buffer
+        # feedback run
+        cur_amp = 0
+        bus = 0
+        while allComps[-1].is_running():
+            allComps[cur_amp].insert_pipeline(bus)
+            allComps[cur_amp].run(restart=False)
+            bus = allComps[cur_amp].read_pipeline()
+            cur_amp += 1
+            cur_amp = cur_amp % len(allComps)
+
+        # print("*", end="", flush=True)
+        if bus > biggest_out:
+            print(f"winner: phase {phase} : value {bus}")
+            biggest_out = bus
             biggest_phase = phase
         # else:
         #     print(f"loser: {next_buffer}")
@@ -230,8 +284,56 @@ def solutionPt1(items):
             # print("blah")
         # print(phase_num)
 
-        if phase_num == 10432:
-            flagged_output = next_buffer
+
+        phase_num += 1
+
+    print(f"tagged output {flagged_output}")
+
+    return biggest_out, biggest_phase
+
+def solutionPt1(items, phases):
+    phase_num = 0
+    biggest_out = 0
+    biggest_phase = []
+
+    flagged_output = 0
+
+    allComps = []
+    for i in range(0, 5):
+        comp = Computer(items.copy())
+        comp.pipe_mode = True
+        allComps.append(comp)
+
+    possibleSettings = permutations(phases, 5)
+
+    for setting in possibleSettings:
+
+        digit = 0
+        for comp in allComps:
+            comp.reset()
+            comp.insert_pipeline(setting[digit])
+            comp.run(restart=True)
+            digit += 1
+        # phase = digit_splitter(1234, 5)
+        phase = setting
+        phase_digit = 0
+        buffer = 0
+        for amp in allComps:
+            amp.insert_pipeline(buffer)
+            amp.run(restart=False)
+            buffer = amp.read_pipeline()
+            phase_digit += 1
+
+        if buffer > biggest_out:
+            print(f"winner: phase {phase_num} : value {buffer}")
+            biggest_out = buffer
+            biggest_phase = phase
+        # else:
+        #     print(f"loser: {next_buffer}")
+        if phase_num % 10000 == 0:
+            print(f"{int(phase_num/10000)}", end="", flush=True)
+            # print("blah")
+        # print(phase_num)
 
         phase_num += 1
 
