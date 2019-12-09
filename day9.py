@@ -30,9 +30,9 @@ def main(argv):
     if argv.phase == 1:
         sol = solutionPt1(commands)
         print(f"computer outputted {sol}")
-    # elif argv.phase == 2:
-    #     sol = solutionPt2(commands, [5,6,7,8,9])
-    #     print(f"\nBiggest output is {sol[0]} at {sol[1]}")
+    elif argv.phase == 2:
+        sol = solutionPt2(commands)
+        print(f"coordinate are {sol}")
 
 
 # Opcode 1 adds together numbers read from two positions and stores the result in a third position.
@@ -266,66 +266,19 @@ def digit_splitter(num, min_size=1):
     return digits
 
 
-def solutionPt2(items, phases):
-    phase_num = 0
-    biggest_out = 0
-    biggest_phase = []
-
-    flagged_output = 0
-
-    allComps = []
-    for i in range(0, 5):
-        comp = Computer(items.copy())
-        comp.pipe_mode = True
-        allComps.append(comp)
-
-    possibleSettings = permutations([5,6,7,8,9], 5)
-
-    for phase in possibleSettings:
-
-        phase_digit = 0
-        print(f"curPhase : {phase}")
-
-        # setup and firstrun with phases
-        for amp in allComps:
-            amp.reset()
-            amp.insert_pipeline(phase[phase_digit])
-            amp.run()
-            phase_digit += 1
-
-        # feedback run
-        cur_amp = 0
-        bus = 0
-        while allComps[-1].is_running():
-            allComps[cur_amp].insert_pipeline(bus)
-            allComps[cur_amp].run(restart=False)
-            bus = allComps[cur_amp].read_pipeline()
-            cur_amp += 1
-            cur_amp = cur_amp % len(allComps)
-
-        # print("*", end="", flush=True)
-        if bus > biggest_out:
-            print(f"winner: phase {phase} : value {bus}")
-            biggest_out = bus
-            biggest_phase = phase
-        # else:
-        #     print(f"loser: {next_buffer}")
-        if phase_num % 10000 == 0:
-            print(f"{int(phase_num/10000)}", end="", flush=True)
-            # print("blah")
-        # print(phase_num)
-
-
-        phase_num += 1
-
-    print(f"tagged output {flagged_output}")
-
-    return biggest_out, biggest_phase
-
 def solutionPt1(items):
 
     comp = Computer(items.copy())
     comp.insert_pipeline(1)
+    comp.run()
+
+    return comp.outpipe
+
+
+def solutionPt2(items):
+
+    comp = Computer(items.copy())
+    comp.insert_pipeline(2)
     comp.run()
 
     return comp.outpipe
