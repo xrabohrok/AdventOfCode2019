@@ -61,7 +61,6 @@ def main(argv):
 # Opcode 8 is equals: if the first parameter is equal to the second parameter, it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
 
 # 99 means that the program is finished and should immediately halt.
-
 class Computer:
     # a 'none' input is a user input halt
     def __init__(self, program, prog_input=None):
@@ -116,6 +115,12 @@ class Computer:
     def _getOp(self, number):
         return int(number % 100)
 
+    def _grow_mem(self, state, spot):
+        if spot > len(state.turing):
+            growth = spot - len(state.turing)
+            for i in range(0, growth + 1):
+                state.turing.append(0)
+
     def _parseCodes(self, curState):
         opd = curState.clone()
         command = self._getOp(curState.turing[curState.progPointer])
@@ -127,20 +132,52 @@ class Computer:
         # print(f"mode is {mode}")
         # print(f"program is {curState.turing}")
 
-        paramA = 0
+        # 0 address mode
+        # 1 immediate mode
+        # 2 relative (offset) mode
+        loc = 0
         if command in [1, 2, 3, 4, 5, 6, 7, 8]:
-            paramA = opd.turing[opd.turing[opd.progPointer + 1]] if mode[0] == 0 else opd.turing[opd.progPointer + 1]
-        paramB = 0
+            if mode[0] == 0:
+                loc = opd.turing[opd.progPointer + 1]
+            elif mode[0] == 1:
+                loc = opd.progPointer + 1
+            elif mode[0] == 2:
+                loc = opd.relative_base + opd.turing[opd.progPointer + 1]
+        self._grow_mem(opd, loc)
+        paramA = opd.turing[loc]
+
+        loc = 0
         if command in [1, 2, 5, 6, 7, 8]:
-            paramB = opd.turing[opd.turing[opd.progPointer + 2]] if mode[1] == 0 else opd.turing[opd.progPointer + 2]
+            if mode[1] == 0:
+                loc = opd.turing[opd.progPointer + 2]
+            elif mode[1] == 1:
+                loc = opd.progPointer + 2
+            elif mode[1] == 2:
+                loc = opd.relative_base + opd.turing[opd.progPointer + 2]
+        self._grow_mem(opd, loc)
+        paramB = opd.turing[loc]
+
+        loc = 0
+        if command in [1, 2, 5, 6, 7, 8]:
+            if mode[2] == 0:
+                loc = opd.turing[opd.progPointer + 3]
+            elif mode[2] == 1:
+                opd.errored = True
+                opd.running = False
+                print("Illegal write mode *immediate*")
+                return opd
+            elif mode[2] == 2:
+                loc = opd.relative_base + opd.turing[opd.progPointer + 3]
+        self._grow_mem(opd, loc)
+        paramC_loc = loc
 
         if command == 1:
             # Add from first two positions, store in the third
-            opd.turing[opd.turing[opd.progPointer + 3]] = paramA + paramB
+            opd.turing[paramC_loc] = paramA + paramB
             opd.progPointer += 4
         elif command == 2:
             # Add from first two positions, store in the third
-            opd.turing[opd.turing[opd.progPointer + 3]] = paramA * paramB
+            opd.turing[paramC_loc] = paramA * paramB
             opd.progPointer += 4
         elif command == 3:
             # take input
@@ -167,12 +204,16 @@ class Computer:
             opd.progPointer = paramB if paramA == 0 else opd.progPointer + 3
         elif command == 7:
             # if first param is less than second, store 1 in third, otherwise 0
-            opd.turing[opd.turing[opd.progPointer + 3]] = 1 if paramA < paramB else 0
+            opd.turing[paramC_loc] = 1 if paramA < paramB else 0
             opd.progPointer += 4
         elif command == 8:
             # if first param is equal to second, store 1 in third, otherwise 0
-            opd.turing[opd.turing[opd.progPointer + 3]] = 1 if paramA == paramB else 0
+            opd.turing[paramC_loc] = 1 if paramA == paramB else 0
             opd.progPointer += 4
+        elif command == 9:
+            # add to the prog's relative base
+            opd.relative_base += paramA
+            opd.progPointer += 2
         elif command == 99:
             # halt
             opd.running = False
@@ -192,6 +233,7 @@ class progState:
         self.running = True
         self.errored = False
         self.paused_for_input = False
+        self.relative_base = 0
 
     def clone(self):
         temp = progState()
@@ -199,7 +241,9 @@ class progState:
         temp.running = self.running
         temp.turing = self.turing.copy()
         temp.paused_for_input = self.paused_for_input
+        temp.relative_base = self.relative_base
         return temp
+
 
 
 def digit_splitter(num, min_size=1):

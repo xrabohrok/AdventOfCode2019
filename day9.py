@@ -28,11 +28,11 @@ def main(argv):
             commands.append(int(x))
 
     if argv.phase == 1:
-        sol = solutionPt1(commands, [0,1,2,3,4])
-        print(f"\nBiggest output is {sol[0]} at {sol[1]}")
-    elif argv.phase == 2:
-        sol = solutionPt2(commands, [5,6,7,8,9])
-        print(f"\nBiggest output is {sol[0]} at {sol[1]}")
+        sol = solutionPt1(commands)
+        print(f"computer outputted {sol}")
+    # elif argv.phase == 2:
+    #     sol = solutionPt2(commands, [5,6,7,8,9])
+    #     print(f"\nBiggest output is {sol[0]} at {sol[1]}")
 
 
 # Opcode 1 adds together numbers read from two positions and stores the result in a third position.
@@ -116,11 +116,11 @@ class Computer:
     def _getOp(self, number):
         return int(number % 100)
 
-    def _grow_mem(self, spot):
-        if spot > len(self.cur_state.turing):
-            growth = len(self.cur_state.turing) - spot
-            for i in range(0, growth):
-                self.cur_state.turing.append(0)
+    def _grow_mem(self, state, spot):
+        if spot > len(state.turing):
+            growth = spot - len(state.turing)
+            for i in range(0, growth+2):
+                state.turing.append(0)
 
 
     def _parseCodes(self, curState):
@@ -137,19 +137,18 @@ class Computer:
         # 0 address mode
         # 1 immediate mode
         # 2 relative (offset) mode
-        paramA = 0
         loc = 0
-        if command in [1, 2, 3, 4, 5, 6, 7, 8]:
+        if command in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
             if mode[0] == 0:
                 loc = opd.turing[opd.progPointer + 1]
             elif mode[0] == 1:
                 loc = opd.progPointer + 1
             elif mode[0] == 2:
                 loc = opd.relative_base + opd.turing[opd.progPointer + 1]
-        self._grow_mem(loc)
-        paramA = opd.turing[loc]
+            self._grow_mem(opd, loc)
+            paramA = opd.turing[loc]
+        paramA_loc = loc
 
-        paramB = 0
         loc = 0
         if command in [1, 2, 5, 6, 7, 8]:
             if mode[1] == 0:
@@ -158,25 +157,40 @@ class Computer:
                 loc = opd.progPointer + 2
             elif mode[1] == 2:
                 loc = opd.relative_base + opd.turing[opd.progPointer + 2]
-        self._grow_mem(loc)
-        paramB = opd.turing[loc]
+            self._grow_mem(opd, loc)
+            paramB = opd.turing[loc]
+        paramB_loc = loc
+
+        loc = 0
+        if command in [1, 2, 7, 8]:
+            if mode[2] == 0:
+                loc = opd.turing[opd.progPointer + 3]
+            elif mode[2] == 1:
+                opd.errored = True
+                opd.running = False
+                print("Illegal write mode *immediate*")
+                return opd
+            elif mode[2] == 2:
+                loc = opd.relative_base + opd.turing[opd.progPointer + 3]
+            self._grow_mem(opd, loc)
+        paramC_loc = loc
 
         if command == 1:
             # Add from first two positions, store in the third
-            opd.turing[opd.turing[opd.progPointer + 3]] = paramA + paramB
+            opd.turing[paramC_loc] = paramA + paramB
             opd.progPointer += 4
         elif command == 2:
             # Add from first two positions, store in the third
-            opd.turing[opd.turing[opd.progPointer + 3]] = paramA * paramB
+            opd.turing[paramC_loc] = paramA * paramB
             opd.progPointer += 4
         elif command == 3:
             # take input
             if opd.paused_for_input:
-                opd.turing[opd.turing[opd.progPointer + 1]] = self.inpipe.pop()
+                opd.turing[paramA_loc] = self.inpipe.pop()
                 opd.paused_for_input = False
             else:
                 if len(self.inpipe) == 1:
-                    opd.turing[opd.turing[opd.progPointer + 1]] = self.inpipe.pop()
+                    opd.turing[paramA_loc] = self.inpipe.pop()
                     opd.paused_for_input = False
                 else:
                     opd.paused_for_input = True
@@ -194,11 +208,11 @@ class Computer:
             opd.progPointer = paramB if paramA == 0 else opd.progPointer + 3
         elif command == 7:
             # if first param is less than second, store 1 in third, otherwise 0
-            opd.turing[opd.turing[opd.progPointer + 3]] = 1 if paramA < paramB else 0
+            opd.turing[paramC_loc] = 1 if paramA < paramB else 0
             opd.progPointer += 4
         elif command == 8:
             # if first param is equal to second, store 1 in third, otherwise 0
-            opd.turing[opd.turing[opd.progPointer + 3]] = 1 if paramA == paramB else 0
+            opd.turing[paramC_loc] = 1 if paramA == paramB else 0
             opd.progPointer += 4
         elif command == 9:
             # add to the prog's relative base
@@ -308,55 +322,13 @@ def solutionPt2(items, phases):
 
     return biggest_out, biggest_phase
 
-def solutionPt1(items, phases):
-    phase_num = 0
-    biggest_out = 0
-    biggest_phase = []
+def solutionPt1(items):
 
-    flagged_output = 0
+    comp = Computer(items.copy())
+    comp.insert_pipeline(1)
+    comp.run()
 
-    allComps = []
-    for i in range(0, 5):
-        comp = Computer(items.copy())
-        comp.pipe_mode = True
-        allComps.append(comp)
-
-    possibleSettings = permutations(phases, 5)
-
-    for setting in possibleSettings:
-
-        digit = 0
-        for comp in allComps:
-            comp.reset()
-            comp.insert_pipeline(setting[digit])
-            comp.run(restart=True)
-            digit += 1
-        # phase = digit_splitter(1234, 5)
-        phase = setting
-        phase_digit = 0
-        buffer = 0
-        for amp in allComps:
-            amp.insert_pipeline(buffer)
-            amp.run(restart=False)
-            buffer = amp.read_pipeline()
-            phase_digit += 1
-
-        if buffer > biggest_out:
-            print(f"winner: phase {phase_num} : value {buffer}")
-            biggest_out = buffer
-            biggest_phase = phase
-        # else:
-        #     print(f"loser: {next_buffer}")
-        if phase_num % 10000 == 0:
-            print(f"{int(phase_num/10000)}", end="", flush=True)
-            # print("blah")
-        # print(phase_num)
-
-        phase_num += 1
-
-    print(f"tagged output {flagged_output}")
-
-    return biggest_out, biggest_phase
+    return comp.outpipe
 
 
 main(parser.parse_args())
