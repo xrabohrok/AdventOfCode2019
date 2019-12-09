@@ -66,12 +66,9 @@ class Computer:
     # a 'none' input is a user input halt
     def __init__(self, program, prog_input=None):
         self.program_orig = program
-        if prog_input is None:
-            self.input = [None]
         self.input_counter = 0
         self.output = []
 
-        self.pipe_mode = False
         self.inpipe = []
         self.outpipe = []
         self.cur_state = None
@@ -147,33 +144,20 @@ class Computer:
             opd.progPointer += 4
         elif command == 3:
             # take input
-            if not self.pipe_mode:
-                if self.input[self.input_counter] is None:
-                    print("HALT---AWAITING INPUT:")
-                    opd.turing[opd.turing[opd.progPointer + 1]] = int(input())
-                else:
-                    opd.turing[opd.turing[opd.progPointer + 1]] = self.input[self.input_counter]
-                if self.input_counter > len(self.input) - 1:
-                    self.input = [None]
-                self.input_counter += 1
+            if opd.paused_for_input:
+                opd.turing[opd.turing[opd.progPointer + 1]] = self.inpipe.pop()
+                opd.paused_for_input = False
             else:
-                if opd.paused_for_input:
+                if len(self.inpipe) == 1:
                     opd.turing[opd.turing[opd.progPointer + 1]] = self.inpipe.pop()
                     opd.paused_for_input = False
                 else:
-                    if len(self.inpipe) == 1:
-                        opd.turing[opd.turing[opd.progPointer + 1]] = self.inpipe.pop()
-                        opd.paused_for_input = False
-                    else:
-                        opd.paused_for_input = True
-                        return opd
+                    opd.paused_for_input = True
+                    return opd
             opd.progPointer += 2
         elif command == 4:
             # output to buffer
-            if not self.pipe_mode:
-                self.output.append(paramA)
-            else:
-                self.outpipe.insert(0, paramA)
+            self.outpipe.insert(0, paramA)
             opd.progPointer += 2
         elif command == 5:
             # first value not zero, set pointer to second val
