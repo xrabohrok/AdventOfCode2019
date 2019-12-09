@@ -1,6 +1,6 @@
 import argparse
 from itertools import permutations
-parser = argparse.ArgumentParser(description="AoC day 7")
+parser = argparse.ArgumentParser(description="AoC day 9")
 parser.add_argument("file", help="The file that should be sourced")
 parser.add_argument("-p", "--phase", help="The part of the exercise that we are at", type=int, default=1)
 parser.add_argument("-t", "--target", help="A target value being aimed for", type=int, default=0)
@@ -116,6 +116,13 @@ class Computer:
     def _getOp(self, number):
         return int(number % 100)
 
+    def _grow_mem(self, spot):
+        if spot > len(self.cur_state.turing):
+            growth = len(self.cur_state.turing) - spot
+            for i in range(0, growth):
+                self.cur_state.turing.append(0)
+
+
     def _parseCodes(self, curState):
         opd = curState.clone()
         command = self._getOp(curState.turing[curState.progPointer])
@@ -127,12 +134,32 @@ class Computer:
         # print(f"mode is {mode}")
         # print(f"program is {curState.turing}")
 
+        # 0 address mode
+        # 1 immediate mode
+        # 2 relative (offset) mode
         paramA = 0
+        loc = 0
         if command in [1, 2, 3, 4, 5, 6, 7, 8]:
-            paramA = opd.turing[opd.turing[opd.progPointer + 1]] if mode[0] == 0 else opd.turing[opd.progPointer + 1]
+            if mode[0] == 0:
+                loc = opd.turing[opd.progPointer + 1]
+            elif mode[0] == 1:
+                loc = opd.progPointer + 1
+            elif mode[0] == 2:
+                loc = opd.relative_base + opd.turing[opd.progPointer + 1]
+        self._grow_mem(loc)
+        paramA = opd.turing[loc]
+
         paramB = 0
+        loc = 0
         if command in [1, 2, 5, 6, 7, 8]:
-            paramB = opd.turing[opd.turing[opd.progPointer + 2]] if mode[1] == 0 else opd.turing[opd.progPointer + 2]
+            if mode[1] == 0:
+                loc = opd.turing[opd.progPointer + 2]
+            elif mode[1] == 1:
+                loc = opd.progPointer + 2
+            elif mode[1] == 2:
+                loc = opd.relative_base + opd.turing[opd.progPointer + 2]
+        self._grow_mem(loc)
+        paramB = opd.turing[loc]
 
         if command == 1:
             # Add from first two positions, store in the third
@@ -173,6 +200,10 @@ class Computer:
             # if first param is equal to second, store 1 in third, otherwise 0
             opd.turing[opd.turing[opd.progPointer + 3]] = 1 if paramA == paramB else 0
             opd.progPointer += 4
+        elif command == 9:
+            # add to the prog's relative base
+            opd.relative_base += paramA
+            opd.progPointer += 2
         elif command == 99:
             # halt
             opd.running = False
@@ -192,6 +223,7 @@ class progState:
         self.running = True
         self.errored = False
         self.paused_for_input = False
+        self.relative_base = 0
 
     def clone(self):
         temp = progState()
@@ -199,6 +231,7 @@ class progState:
         temp.running = self.running
         temp.turing = self.turing.copy()
         temp.paused_for_input = self.paused_for_input
+        temp.relative_base = self.relative_base
         return temp
 
 
