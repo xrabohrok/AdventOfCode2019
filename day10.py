@@ -23,24 +23,24 @@ def main(argv):
     commands = []
     for item in allItems:
         commands.append([])
-        numSet = str.split(item, ',')
-        for x in numSet:
-            commands[-1].append(x)
+        for x in item:
+            if not x == '\n':
+                commands[-1].append(x)
 
     height = len(commands)
     width = len(commands[0])
-    field = encode_asteroids(commands)
-    listing = {}
-    for a in field:
-        if not a.pos[0] in listing.keys():
-            listing[a.pos[0]] = {}
-        listing[a.pos[0]][a.pos[1]] = a
+    listing = encode_asteroids(commands)
+    directory = {}
+    for a in listing:
+        if not a.pos[0] in directory.keys():
+            directory[a.pos[0]] = {}
+        directory[a.pos[0]][a.pos[1]] = a
 
-
-
-    # if argv.phase == 1:
-    #     sol = solutionPt1(commands)
-    #     print(f"The memory dump is {sol}")
+    if argv.phase == 1:
+        sol = solutionPt1(directory, listing, height, width)
+        for a in listing:
+            print(a)
+        print(f"winner: {sol}")
     # elif argv.phase == 2:
     #     sol = solutionPt2(commands, argv.target)
     #     print(f"The correct inputs are {sol}")
@@ -58,7 +58,7 @@ class Asteroid:
         Asteroid._id += 1
 
     def __str__(self):
-        return f"{self.pos[0]}, {self.pos[1]} : {self.id}"
+        return f"{self.pos[0]}, {self.pos[1]} : {self.id}: 00 -> {self.visible}"
 
 
 def encode_asteroids(commands):
@@ -85,7 +85,7 @@ def find_vector(asteroid_a, asteroid_b):
         vec = vec[0]/gcd, vec[1]/gcd
     return vec
 
-def check_asteroids(source, dest, height, width, listing):
+def check_asteroids(source, dest, height, width, directory):
     vec = find_vector(source, dest)
     if vec[0] == 0 and vec[1] == 0:
         return
@@ -93,26 +93,27 @@ def check_asteroids(source, dest, height, width, listing):
     unfound = True
     checker = source.pos[0], source.pos[1]
     while 0 <= checker[0] < width and 0 <= checker[1] < height:
-        if not checker[0] == source.pos[0] and not checker[1] == source.pos[1] and checker[0] in listing.keys and checker[1] in listing[checker[0]].keys:
-            listing[checker[0]][checker[1]].checked_by = source.id
-            if unfound:
-                source.visible += 1
-                unfound = False
-            else:
-                listing[checker[0]][checker[1]].blocked_for = source.id
+        if not (checker[0] == source.pos[0] and checker[1] == source.pos[1]) and checker[0] in directory.keys():
+            if checker[1] in directory[checker[0]].keys():
+                directory[checker[0]][checker[1]].checked_by.append(source.id)
+                if unfound:
+                    source.visible += 1
+                    unfound = False
+                else:
+                    directory[checker[0]][checker[1]].blocked_for.append(source.id)
         checker = checker[0] + vec[0], checker[1] + vec[1]
 
-def check_all_asteroids(asteroids, listing, width, height):
-    for a in asteroids:
-        for b in asteroids:
-            if not a == b:
-                check_asteroids(a, b, height, width, listing)
+def check_all_asteroids(listing, directory, width, height):
+    for a in listing:
+        for b in listing:
+            if not a == b and a.id not in b.checked_by:
+                check_asteroids(a, b, height, width, directory)
 
 
-
-
-def solutionPt1(items):
-    None
+def solutionPt1(asteroid_dict, asteroid_list, height, width):
+    check_all_asteroids(asteroid_list, asteroid_dict, height, width)
+    asteroid_list.sort(key=lambda a: a.visible)
+    return asteroid_list[-1]
 
 def solutionPt2(items, target):
     None
