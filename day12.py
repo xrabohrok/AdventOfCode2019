@@ -137,30 +137,7 @@ def solutionPt1(moons, target_cycle):
     return energy
 
 def solutionPt2(moons):
-    #naive
-    cycle = 0
-    all_combo = {}
-    this_combo = ""
-    while this_combo not in all_combo:
-        all_combo[this_combo] = True
-        for m in moons:
-            for m2 in moons:
-                if m.id not in m2.checked_with and not m.id == m2.id:
-                    m.s_add_gravity(m2)
-
-        this_combo = ""
-        for m in moons:
-            m.s_apply_velocity()
-            m.reset_checked_by()
-            this_combo += m.state_hash()
-        cycle += 1
-        if cycle % 1000000 == 0:
-            print(f"progress: {cycle/1000000}")
-
-    for p in moons:
-        print(p)
-
-    return cycle
+    # tree
 
 
 main(parser.parse_args())
