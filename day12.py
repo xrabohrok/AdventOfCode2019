@@ -1,4 +1,6 @@
 import argparse
+import math
+from functools import reduce
 
 parser = argparse.ArgumentParser(description="AoC day 2")
 parser.add_argument("file", help="The file that should be sourced")
@@ -40,8 +42,8 @@ def main(argv):
         sol = solutionPt1(moons, argv.target)
         print(f"The total energy is {sol}")
     elif argv.phase == 2:
-        sol = solutionPt2(moons)
-        print(f"The repeat is at{sol}")
+        sol = solutionPt2(moons, argv.target)
+        print(f"The repeat is at {sol}")
 
 
 class Moon:
@@ -72,12 +74,30 @@ class Moon:
         self.checked_with.append(other_moon.id)
         other_moon.checked_with.append(self.id)
 
+    def s_add_gravity(self, other_moon):
+
+        change = [0]
+
+        if self.pos[0] > other_moon.pos[0]:
+            change[0] = -1
+        elif self.pos[0] < other_moon.pos[0]:
+            change[0] = 1
+
+        self.vel = (self.vel[0] + change[0]),
+        other_moon.vel = (other_moon.vel[0] - change[0]),
+
+        self.checked_with.append(other_moon.id)
+        other_moon.checked_with.append(self.id)
+
 
     def reset_checked_by(self):
         self.checked_with = []
 
     def apply_velocity(self):
         self.pos = self.vel[0] + self.pos[0], self.vel[1] + self.pos[1], self.vel[2] + self.pos[2]
+
+    def s_apply_velocity(self):
+        self.pos = (self.vel[0] + self.pos[0]),
 
     def find_energy(self):
         potential = 0
@@ -94,9 +114,8 @@ class Moon:
         return f"<pos id={self.id} x={self.pos[0]}, y={self.pos[1]}, z={self.pos[2]}>" \
             f"<vel x={self.vel[0]}, y={self.vel[1]}, z={self.vel[2]}>"
 
-    def state_hash(self):
-        thing = self.pos[0]
-        return f"{thing}"
+    def __eq__(self, other):
+        return self.pos == other.pos and self.vel == other.vel
 
 
 # To apply gravity, consider every pair of moons. On each axis (x, y, and z),
@@ -136,8 +155,62 @@ def solutionPt1(moons, target_cycle):
 
     return energy
 
-def solutionPt2(moons):
-    # tree
+def lcm(a, b):
+    return (a * b) // math.gcd(a, b)
+
+def solutionPt2(moons, target_cycle):
+
+    POS = 0
+    VEL = 1
+
+    cycles = []
+
+    dimm = 0
+    while dimm < 3:
+
+        repeated = False
+        cycle = 0
+        initial = []
+        now = []
+        for m in moons:
+            initial.append((m.pos[dimm], 0))
+            now.append((m.pos[dimm], 0))
+
+
+        while not repeated:
+        # while cycle < target_cycle:
+            # grav
+            for i in range(0, len(initial)):
+                for j in range(0, len(initial)):
+                    if i != j:
+                        if now[i][POS] > now[j][POS]:
+                            now[i] = now[i][POS], now[i][VEL]-1
+                        if now[i][POS] < now[j][POS]:
+                            now[i] = now[i][POS], now[i][VEL]+1
+
+            # vel
+            for i in range(0, len(initial)):
+                now[i] = now[i][VEL] + now[i][POS], now[i][VEL]
+
+            repeated = True
+            for i in range(0, len(initial)):
+                repeated = repeated and now[i] == initial[i]
+            cycle += 1
+
+        print(f"Dimm {dimm} Cycle {cycle}")
+        dimm += 1
+        cycles.append(cycle)
+
+    overlap = 1
+
+    gcd = math.gcd(cycles[0], cycles[1])
+    gcd = math.gcd(gcd, cycles[2])
+    print(f"answer: {reduce(lcm, cycles)}")
+
+    for c in cycles:
+        overlap *= c/gcd
+
+    return overlap
 
 
 main(parser.parse_args())
