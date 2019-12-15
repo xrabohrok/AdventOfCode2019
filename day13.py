@@ -1,4 +1,5 @@
 import argparse
+import os
 from itertools import permutations
 parser = argparse.ArgumentParser(description="AoC day 13")
 parser.add_argument("file", help="The file that should be sourced")
@@ -30,16 +31,82 @@ def main(argv):
     if argv.phase == 1:
         sol = solutionPt1(commands)
         print(f"Total was {sol}")
-    # elif argv.phase == 2:
-    #     solutionPt2(commands)
+    elif argv.phase == 2:
+        sol = solutionPt2(commands)
+        print(f"Final score: {sol}")
 
 def insert_into_screen(x, y, id, screen_buffer):
+    if id is None:
+        return
     if y not in screen_buffer:
         screen_buffer[y] = {x: id}
         return
     else:
         screen_buffer[y][x] = id
         return
+
+def display_screen_buffer(screen_buffer, last_state):
+    ymax = max(screen_buffer.keys())
+    xmax = 100
+    os.system("cls")
+
+    # nothing, box, block, paddle, ball
+    sprites = [' ', u"\u25A1", 'H', '=', 'o']
+
+    ball = last_state[0]
+    paddle = last_state[1]
+    for j in range(0, ymax + 1):
+        for i in range(0, xmax + 1):
+            if j in screen_buffer.keys() and i in screen_buffer[j].keys():
+                pixel = screen_buffer[j][i]
+                char = sprites[pixel]
+                print(char, end='', flush=True)
+                if pixel == 4:
+                    ball = i, j
+                if pixel == 3:
+                    paddle = i, j
+        print()
+    if 0 in screen_buffer.keys() and -1 in screen_buffer[0].keys():
+        print(f"score: {screen_buffer[0][-1]}")
+
+
+    joystick = 0
+    vert = ball[1] - last_state[0][1]
+    if vert> 1 or vert < -1:
+        return ball, paddle, joystick
+
+    if vert < 0:
+        # follow ball generically going upward
+        trend = ball[0] - paddle[0]
+        if trend > 0:
+            joystick = 1
+        elif trend < 0:
+            joystick = -1
+        elif trend == 0:
+            old_trend = ball[0] - last_state[0][0]
+            if old_trend > 0:
+                joystick = 1
+            elif old_trend < 0:
+                joystick = -1
+        else:
+            joystick = 0
+    elif vert > 0:
+        # going down, we want to be at a target
+        slope = ball[0] - last_state[0][0], ball[1] - last_state[0][1]
+        ghost = ball[0], ball[1]
+        while ghost[1] != paddle[1] - 1:
+            ghost = ghost[0] + slope[0], ghost[1] + slope[1]
+        if paddle[0] < ghost[0]:
+            joystick = 1
+        elif paddle[0] > ghost[0]:
+            joystick = -1
+        else:
+            joystick = 0
+    else:
+        joystick = 0
+
+    return ball, paddle, joystick
+
 
 def solutionPt1(commands):
 
@@ -67,6 +134,38 @@ def solutionPt1(commands):
     return blocks
 
 
+def solutionPt2(commands):
+
+    # y -> x -> id
+    screen_buffer = {}
+
+    comp = Computer(commands, halting_output=True)
+
+    # comp.insert_pipeline(painted)
+    first_run = True
+    cur_state = (0, 0), (0, 0), 0
+    out_stack = []
+    while comp.is_running() or first_run:
+        first_run = False
+
+        # inject_input(comp, cur_state)
+        comp.run(restart=False)
+        inject_input(comp, cur_state)
+        if comp.cur_state.paused_for_stream:
+            out_stack.append(comp.read_pipeline())
+        if len(out_stack) == 3:
+            insert_into_screen(out_stack[0], out_stack[1], out_stack[2], screen_buffer)
+            cur_state = display_screen_buffer(screen_buffer, cur_state)
+            out_stack = []
+
+    print("game done")
+
+    return screen_buffer[0][-1]
+
+
+def inject_input(comp, cur_state):
+    if comp.cur_state.paused_for_input:
+        comp.insert_pipeline(cur_state[2])
 
 
 ##############################################################
