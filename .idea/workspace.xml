@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="574ec25a-9567-49bc-a1b6-e6da8f9127b9" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/day15.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/inputs/day15" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/day13.py" beforeDir="false" afterPath="$PROJECT_DIR$/day13.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inputs/day13" beforeDir="false" afterPath="$PROJECT_DIR$/inputs/day13" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,7 +38,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/day13.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/day15.py" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -47,7 +47,7 @@
       <recent name="C:\Users\westi\PycharmProjects\AdventOfCode2019\inputs" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.day13">
+  <component name="RunManager" selected="Python.day15">
     <configuration name="day10" type="PythonConfigurationType" factoryName="Python">
       <module name="AdventOfCode2019" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -158,6 +158,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="day15" type="PythonConfigurationType" factoryName="Python">
+      <module name="AdventOfCode2019" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\westi\PycharmProjects\AdventOfCode2019\venv\Scripts\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/day15.py" />
+      <option name="PARAMETERS" value="inputs/day15" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="day7" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="AdventOfCode2019" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -186,6 +208,7 @@
       <item itemvalue="Python.day12" />
       <item itemvalue="Python.day12-alt" />
       <item itemvalue="Python.day13" />
+      <item itemvalue="Python.day15" />
       <item itemvalue="Python.day7" />
     </list>
     <recent_temporary>
@@ -224,7 +247,7 @@
       <workItem from="1575955481957" duration="5932000" />
       <workItem from="1576042286643" duration="5042000" />
       <workItem from="1576177727893" duration="21031000" />
-      <workItem from="1576383999297" duration="10822000" />
+      <workItem from="1576383999297" duration="29062000" />
     </task>
     <servers />
   </component>
@@ -232,22 +255,26 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="466" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1576389076874">
+    <state x="466" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1576443472398">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="466" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576389076874" />
-    <state x="732" y="322" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1576384877649">
+    <state x="466" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576443472398" />
+    <state x="732" y="322" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1576443403803">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="732" y="322" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576384877649" />
+    <state x="732" y="322" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576443403803" />
     <state x="1220" y="368" key="#xdebugger.evaluate" timestamp="1576046331552">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="1220" y="368" key="#xdebugger.evaluate/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576046331552" />
-    <state x="739" y="380" width="440" height="385" key="FileChooserDialogImpl" timestamp="1576385196727">
+    <state width="523" height="466" key="DebuggerActiveHint" timestamp="1576450229975">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="739" y="380" width="440" height="385" key="FileChooserDialogImpl/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576385196727" />
+    <state width="523" height="466" key="DebuggerActiveHint/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576450229975" />
+    <state x="739" y="380" width="440" height="385" key="FileChooserDialogImpl" timestamp="1576443456354">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="739" y="380" width="440" height="385" key="FileChooserDialogImpl/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576443456354" />
     <state width="1877" height="338" key="GridCell.Tab.-1.bottom" timestamp="1576045788811">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -264,22 +291,22 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1877" height="338" key="GridCell.Tab.-1.right/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576045788811" />
-    <state width="1877" height="337" key="GridCell.Tab.0.bottom" timestamp="1576392159370">
+    <state width="1877" height="337" key="GridCell.Tab.0.bottom" timestamp="1576451782261">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="337" key="GridCell.Tab.0.bottom/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576392159370" />
-    <state width="1877" height="337" key="GridCell.Tab.0.center" timestamp="1576392159370">
+    <state width="1877" height="337" key="GridCell.Tab.0.bottom/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576451782261" />
+    <state width="1877" height="337" key="GridCell.Tab.0.center" timestamp="1576451782261">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="337" key="GridCell.Tab.0.center/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576392159370" />
-    <state width="1877" height="337" key="GridCell.Tab.0.left" timestamp="1576392159370">
+    <state width="1877" height="337" key="GridCell.Tab.0.center/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576451782261" />
+    <state width="1877" height="337" key="GridCell.Tab.0.left" timestamp="1576451782260">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="337" key="GridCell.Tab.0.left/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576392159370" />
-    <state width="1877" height="337" key="GridCell.Tab.0.right" timestamp="1576392159370">
+    <state width="1877" height="337" key="GridCell.Tab.0.left/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576451782260" />
+    <state width="1877" height="337" key="GridCell.Tab.0.right" timestamp="1576451782261">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="337" key="GridCell.Tab.0.right/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576392159370" />
+    <state width="1877" height="337" key="GridCell.Tab.0.right/0.0.1920.1040/-1920.0.1920.1160@0.0.1920.1040" timestamp="1576451782261" />
     <state width="1877" height="338" key="GridCell.Tab.1.bottom" timestamp="1576045785519">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -384,6 +411,27 @@
           <line>96</line>
           <option name="timeStamp" value="74" />
         </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/day15.py</url>
+          <line>189</line>
+          <option name="timeStamp" value="89" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/day15.py</url>
+          <line>103</line>
+          <option name="timeStamp" value="96" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <condition expression="target == (-1, 0)" language="Python" />
+          <url>file://$PROJECT_DIR$/day15.py</url>
+          <line>169</line>
+          <option name="timeStamp" value="101" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/day15.py</url>
+          <line>146</line>
+          <option name="timeStamp" value="102" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -393,6 +441,12 @@
         </breakpoint>
       </default-breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="len(world.unsearched)" />
+        <watch expression="list_path" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/adventOfCode2019$day12.coverage" NAME="day12 Coverage Results" MODIFIED="1576279614562" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -400,6 +454,7 @@
     <SUITE FILE_PATH="coverage/AdventOfCode2019$day13.coverage" NAME="day13 Coverage Results" MODIFIED="1576392159344" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/AdventOfCode2019$day11.coverage" NAME="day11 Coverage Results" MODIFIED="1576046501961" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/AdventOfCode2019$day9.coverage" NAME="day9 Coverage Results" MODIFIED="1575872805849" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/AdventOfCode2019$day15.coverage" NAME="day15 Coverage Results" MODIFIED="1576451782239" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/AdventOfCode2019$day7.coverage" NAME="day7 Coverage Results" MODIFIED="1575869759819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/adventOfCode2019$day12_alt.coverage" NAME="day12-alt Coverage Results" MODIFIED="1576279657253" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
